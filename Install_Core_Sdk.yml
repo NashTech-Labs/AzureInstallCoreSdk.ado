@@ -1,0 +1,73 @@
+# Use this task to acquire a specific version of the .NET Core SDK from the internet or the local cache and add it to the PATH. 
+# Use this task to change the version of .NET Core that is used in subsequent tasks.
+
+parameters:
+- name: packageType
+  type: string
+  default: 'sdk'
+
+- name: installationPath
+  type: string
+  default: '$(Agent.ToolsDirectory)/dotnet'
+
+- name: CoreSDKVersion
+  type: string
+  default: "7.0.200"
+
+- name: useGlobalJson
+  type: boolean
+  default: false
+
+- name: performMultiLevelLookup
+  type: boolean
+  default: true
+
+- name: includePreviewVersions
+  type: boolean
+  default: true
+
+- name: vsCodeVersion
+  type: string
+  default: ''
+
+- name: filePath
+  type: string
+  default: ''
+
+steps:
+- ${{ if eq( parameters.packageType, 'sdk') }}:
+  - ${{ if eq( parameters.useGlobalJson, false) }}:
+    - task: UseDotNet@2
+      displayName: 'Install .NET Core SDK without useGlobalJson'
+      inputs:
+        packageType: '${{ parameters.packageType }}'
+        useGlobalJson: '${{ parameters.useGlobalJson }}'
+        version: '${{ parameters.CoreSDKVersion }}'
+        workingDirectory: '${{ parameters.filePath }}'
+        vsVersion: '${{ parameters.vsCodeVersion }}'
+        installationPath: '${{ parameters.installationPath }}'
+        performMultiLevelLookup: '${{ parameters.performMultiLevelLookup }}'
+
+  - ${{ else }}:
+    - task: UseDotNet@2
+      displayName: 'Install .NET Core SDK with useGlobalJson'
+      inputs:
+        packageType: '${{ parameters.packageType }}'
+        useGlobalJson: '${{ parameters.useGlobalJson }}'
+        workingDirectory: '${{ parameters.filePath }}'
+        vsVersion: '${{ parameters.vsCodeVersion }}'
+        installationPath: '${{ parameters.installationPath }}'
+        performMultiLevelLookup: '${{ parameters.performMultiLevelLookup }}'
+
+- ${{ elseif eq( parameters.packageType, 'runtime') }}:
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core Runtime'
+    inputs:
+      packageType: '${{ parameters.packageType }}'
+      version: '${{ parameters.CoreSDKVersion }}'
+      vsVersion: '${{ parameters.vsCodeVersion }}'
+      includePreviewVersions: '${{ parameters.includePreviewVersions }}'
+      installationPath: '${{ parameters.installationPath }}'
+
+
+
